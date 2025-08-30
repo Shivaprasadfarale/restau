@@ -1,103 +1,211 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import React from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/auth-context'
+import { useAuthModal, AuthModal } from '@/components/auth'
+import { Button } from '@/components/ui/button'
+import { User, LogOut, Settings, Package, Search } from 'lucide-react'
+import Link from 'next/link'
+
+export default function HomePage() {
+  const router = useRouter()
+  const { user, isAuthenticated, logout } = useAuth()
+  const authModal = useAuthModal()
+
+  const handleLogout = async () => {
+    await logout()
+  }
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <h1 className="text-xl font-bold text-gray-900">
+                Restaurant Template
+              </h1>
+            </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <div className="flex items-center space-x-4">
+              {/* Navigation Links */}
+              <nav className="hidden md:flex items-center space-x-4">
+                <Link href="/track">
+                  <Button variant="ghost" size="sm">
+                    <Search className="h-4 w-4 mr-2" />
+                    Track Order
+                  </Button>
+                </Link>
+                {isAuthenticated && (
+                  <Link href="/orders">
+                    <Button variant="ghost" size="sm">
+                      <Package className="h-4 w-4 mr-2" />
+                      My Orders
+                    </Button>
+                  </Link>
+                )}
+              </nav>
+
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <User className="h-5 w-5 text-gray-400" />
+                    <span className="text-sm font-medium text-gray-700">
+                      {user?.name}
+                    </span>
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                      {user?.role}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    onClick={authModal.openLogin}
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    onClick={authModal.openRegister}
+                  >
+                    Sign Up
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            Welcome to Restaurant Template
+          </h2>
+          <p className="text-lg text-gray-600 mb-8">
+            A complete restaurant website template with authentication, ordering system, and admin panel.
+          </p>
+
+          {isAuthenticated ? (
+            <div className="bg-white rounded-lg shadow p-6 max-w-md mx-auto">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                  <User className="w-8 h-8 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Welcome back, {user?.name}!
+                  </h3>
+                  <p className="text-gray-600">
+                    You are logged in as a {user?.role}
+                  </p>
+                </div>
+                <div className="space-y-2 text-sm text-gray-500">
+                  <p>Email: {user?.email}</p>
+                  {user?.phone && <p>Phone: {user?.phone}</p>}
+                  <p>Tenant ID: {user?.tenantId}</p>
+                  <p>
+                    Status: {user?.isVerified ? (
+                      <span className="text-green-600">Verified</span>
+                    ) : (
+                      <span className="text-yellow-600">Unverified</span>
+                    )}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Account Settings
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-gray-600">
+                Please sign in to access your account and start ordering.
+              </p>
+              <div className="flex justify-center space-x-4">
+                <Button
+                  size="lg"
+                  onClick={authModal.openLogin}
+                >
+                  Sign In
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={authModal.openRegister}
+                >
+                  Create Account
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mt-8 flex justify-center space-x-4">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => window.location.href = '/menu'}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            View Menu
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => window.location.href = '/admin'}
+            className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
           >
-            Read our docs
-          </a>
+            <Settings className="h-4 w-4 mr-2" />
+            Admin Panel
+          </Button>
+        </div>
+
+        {/* Feature Cards */}
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold mb-2">Secure Authentication</h3>
+            <p className="text-gray-600">
+              JWT-based authentication with refresh tokens, RBAC, and multi-factor authentication support.
+            </p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold mb-2">Order Management</h3>
+            <p className="text-gray-600">
+              Complete ordering system with real-time updates, payment integration, and order tracking.
+            </p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold mb-2">Admin Dashboard</h3>
+            <p className="text-gray-600">
+              Comprehensive admin panel for managing menus, orders, users, and restaurant settings.
+            </p>
+          </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModal.isOpen}
+        onClose={authModal.close}
+        defaultMode={authModal.mode}
+      />
     </div>
-  );
+  )
 }

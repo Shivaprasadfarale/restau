@@ -18,7 +18,26 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "*.config.js",
+      "*.config.ts",
     ],
+  },
+  {
+    rules: {
+      // TypeScript specific rules
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-explicit-any": "warn",
+      
+      // React specific rules
+      "react-hooks/exhaustive-deps": "warn",
+      "react/jsx-key": "error",
+      "react/no-unescaped-entities": "off",
+      
+      // General rules
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "prefer-const": "error",
+      "no-var": "error",
+    },
   },
 ];
 
